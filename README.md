@@ -37,6 +37,12 @@ If you generate the API documentation yourself you can easily upload it to your 
 firebase deploy --only hosting --project YOUR_PROJECT_NAME
 ```
 
+# Order Status
+
+For order status transitions see the following diagram from [SWFT](https://docs.en.swft.pro/cross-chain-exchange-api/exchange-time-order-graph)
+
+![SWFT order transitions](/public/resources/states.png)
+
 # Contribution
 
 We <3 our contributors! Many thanks to all supporters. We want to encourage everyone to become part of the development and support us with translations, testing and patches. If you want to help us please don't hesitate to contact us and become a part of the community.
