@@ -1,0 +1,90 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint",
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ]
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/api/order",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }, {
+            "key": "Access-Control-Allow-Methods",
+            "value": "POST, OPTIONS"
+          }, {
+            "key": "Access-Control-Allow-Headers",
+            "value": "Origin,  X-Requested-With, Content-Type, Accept"
+          }
+        ]
+      },
+      {
+        "source": "/api/order/:id",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=20"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      },
+      {
+        "source": "/api/pairs",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      },
+      {
+        "source": "/api/rate/:deposit/:receive",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=10"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/order{,/*}",
+        "function": "order"
+      },
+      {
+        "source": "/api/pairs",
+        "function": "pairs"
+      },
+      {
+        "source": "/api/rate/:deposit/:receive",
+        "function": "rate"
+      }
+    ]
+  }
+}

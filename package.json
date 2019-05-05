@@ -1,0 +1,36 @@
+{
+  "name": "mvs-coin-bridge",
+  "version": "0.1.0",
+  "description": "Gateway for the Metaverse Bridge.",
+  "apidoc": {
+    "title": "Metaverse Brigde API",
+    "name": "Metaverse Brigde API",
+    "description": "Gateway for the Metaverse Bridge. The payment processing is provided by <a href=\"https://transfer.swft.pro\">SWFT</a>.",
+    "url": "https://bridge.mvs.org/api",
+    "sampleUrl": "https://bridge.mvs.org/api",
+    "order": [
+      "Pairs",
+      "Rate",
+      "Order"
+    ],
+    "template": {
+      "forceLanguage": "en",
+      "withCompare": false,
+      "withGenerator": false
+    }
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "apidoc": "^0.17.7"
+  },
+  "scripts": {
+    "apidoc": "./node_modules/apidoc/bin/apidoc -i functions/src -o public",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "AGPL-3.0-or-later"
+}
