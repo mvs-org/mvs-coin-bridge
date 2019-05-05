@@ -15,6 +15,12 @@ To install the firebase cli just run
 npm install -g firebase-tools
 ```
 
+You can run the code locally with the following command
+
+```
+firebase serve
+```
+
 To deploy the code to your project you just need to run
 
 ```
