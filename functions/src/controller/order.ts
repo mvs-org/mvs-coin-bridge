@@ -11,7 +11,6 @@ initializeApp()
 export const orderApp = express()
 orderApp.use(bodyParser.json({ type: 'application/*+json' }))
 
-
 /**
  * @api {get} /order/:id Get order details
  * @apiName GetOrder
@@ -74,14 +73,10 @@ orderApp.get('*/:id', async (request: Request, response: Response) => {
 
         response.json(order)
 
-        await firestore().collection('order').doc(order.id).update({
-            touched: firestore.FieldValue.serverTimestamp(),
-            order
-        })
+        saveOrder(order)
             .catch(error => {
-                console.log(`error updating db record of unknown order ${id}: ${error.message}`)
+                console.log(`error updating db record of unknown order ${order.id}: ${error.message}`)
             })
-
 
     } catch (error) {
         console.error(error)
@@ -171,13 +166,38 @@ orderApp.post('*', async (request: Request, response: Response) => {
 
         const order = parseSWFTOrderDetails(rawResponse)
         response.json(order)
-        await firestore().collection('order').doc(order.id).set({ order, created: firestore.FieldValue.serverTimestamp() })
+
+        saveOrder(order)
+            .catch(error => {
+                console.log(`error setting db record of unknown order ${order.id}: ${error.message}`)
+            })
 
     } catch (error) {
         console.error(error)
         response.status(500).send(error.message)
     }
 })
+
+async function saveOrder(order: OrderDetails, id: string = order.id, failOnExist = false) {
+
+    const orderRef = firestore().collection('order').doc(id)
+    const snapshot = await orderRef.get();
+
+    if (snapshot.exists) {
+        if (failOnExist) throw Error('Order already exists on database')
+        return orderRef.update({
+            touched: firestore.FieldValue.serverTimestamp(),
+            order
+        });
+    }
+    else {
+        return orderRef.set({
+            order,
+            created: firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+}
 
 function parseSWFTOrderDetails(rawResponse: SWFTResponse<SWFTOrderDetails>): OrderDetails {
     return {
