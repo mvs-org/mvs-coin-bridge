@@ -7,6 +7,7 @@ export interface SWFTResponse<T> {
 export interface SWFTOrderDetails {
     changeType: string
     choiseFeeType: string
+    createTime?: string,
     depositCoinAmt: string
     depositCoinCode: string
     depositCoinFeeAmt: string

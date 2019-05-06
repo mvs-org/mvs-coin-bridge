@@ -73,7 +73,7 @@ orderApp.get('*/:id', async (request: Request, response: Response) => {
 
         response.json(order)
 
-        saveOrder(order)
+        saveOrder(order, rawResponse)
             .catch(error => {
                 console.log(`error updating db record of unknown order ${order.id}: ${error.message}`)
             })
@@ -167,7 +167,7 @@ orderApp.post('*', async (request: Request, response: Response) => {
         const order = parseSWFTOrderDetails(rawResponse)
         response.json(order)
 
-        saveOrder(order)
+        saveOrder(order, rawResponse, true)
             .catch(error => {
                 console.log(`error setting db record of unknown order ${order.id}: ${error.message}`)
             })
@@ -178,7 +178,7 @@ orderApp.post('*', async (request: Request, response: Response) => {
     }
 })
 
-async function saveOrder(order: OrderDetails, id: string = order.id, failOnExist = false) {
+async function saveOrder(order: OrderDetails, swftOrder: SWFTResponse<SWFTOrderDetails>, failOnExist = false, id: string = order.id) {
 
     const orderRef = firestore().collection('order').doc(id)
     const snapshot = await orderRef.get();
@@ -187,12 +187,14 @@ async function saveOrder(order: OrderDetails, id: string = order.id, failOnExist
         if (failOnExist) throw Error('Order already exists on database')
         return orderRef.update({
             touched: firestore.FieldValue.serverTimestamp(),
+            latestResponse: swftOrder,
             order
         });
     }
     else {
         return orderRef.set({
             order,
+            createResponse: swftOrder,
             created: firestore.FieldValue.serverTimestamp()
         });
     }
@@ -200,9 +202,11 @@ async function saveOrder(order: OrderDetails, id: string = order.id, failOnExist
 }
 
 function parseSWFTOrderDetails(rawResponse: SWFTResponse<SWFTOrderDetails>): OrderDetails {
+    const date = rawResponse.data.createTime ? new Date(rawResponse.data.createTime) : new Date()
     return {
         id: rawResponse.data.orderId,
         status: rawResponse.data.detailState,
+        created: date.toISOString(),
         deposit: {
             address: rawResponse.data.platformAddr,
             amount: parseFloat(rawResponse.data.depositCoinAmt),

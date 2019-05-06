@@ -12,6 +12,7 @@ export interface Rate {
 export interface OrderDetails {
     id: string
     status: string
+    created: string,
     deposit: {
         address: string,
         amount: number
