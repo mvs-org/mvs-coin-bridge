@@ -1,6 +1,6 @@
 import { SWFTResponse, SWFTOrderDetails, SWFTPairDefinition, SWFTRate } from "../interfaces/swft.interfaces";
 import { post } from 'superagent'
-import { SWFT_URL, SWFT_SOURCE_FLAG } from "../config/swft.config";
+import { getSWFTConfig } from "../config/swft.config";
 import uuidv4 = require('uuid/v4');
 
 export interface CreateOrderParameters {
@@ -13,7 +13,7 @@ export interface CreateOrderParameters {
 }
 
 export async function getRate (depositSymbol: string, receiveSymbol: string): Promise<SWFTResponse<SWFTRate>> {
-    const rawResponse = await post(SWFT_URL + '/api/v1/getBaseInfo')
+    const rawResponse = await post(getSWFTConfig('url') + '/api/v1/getBaseInfo')
         .set('Content-Type', 'application/json')
         .send({ depositCoinCode: depositSymbol, receiveCoinCode: receiveSymbol })
     const result = JSON.parse(rawResponse.text)
@@ -22,14 +22,15 @@ export async function getRate (depositSymbol: string, receiveSymbol: string): Pr
 }
 
 export async function getPairs (): Promise<SWFTResponse<SWFTPairDefinition[]>> {
-    const rawResponse = await post(SWFT_URL + '/api/v1/queryCoinList')
+    const rawResponse = await post(getSWFTConfig('url') + '/api/v1/queryCoinList')
         .set('Content-Type', 'application/json');
     const result = JSON.parse(rawResponse.text)
     evaluateSWFTResponse(result.resCode)
     return result;
 }
+
 export async function getOrderState (id: string): Promise<SWFTResponse<SWFTOrderDetails>> {
-    const rawResponse = await post(SWFT_URL + '/api/v2/queryOrderState')
+    const rawResponse = await post(getSWFTConfig('url') + '/api/v2/queryOrderState')
         .set('Content-Type', 'application/json')
         .send({
             equipmentNo: "mvs_wallet",
@@ -42,13 +43,13 @@ export async function getOrderState (id: string): Promise<SWFTResponse<SWFTOrder
 }
 
 export async function createOrder (parameters: CreateOrderParameters): Promise<SWFTResponse<SWFTOrderDetails>> {
-    const rawResponse = await post(SWFT_URL + '/api/v2/accountExchange')
+    const rawResponse = await post(getSWFTConfig('url') + '/api/v2/accountExchange')
         .set('Content-Type', 'application/json')
         .send({
             equipmentNo: 'mvs_wallet',
             sessionUuid: '',
-            sourceType: 'H5',
-            userNo: '',
+            sourceType: getSWFTConfig('source_type'),
+            userNo: getSWFTConfig('user_no'),
             orderId: uuidv4(),
             depositCoinCode: parameters.depositSymbol,
             receiveCoinCode: parameters.receiveSymbol,
@@ -57,8 +58,8 @@ export async function createOrder (parameters: CreateOrderParameters): Promise<S
             receiveSwftAmt: '0',
             destinationAddr: parameters.receiveAddress,
             refundAddr: parameters.refundAddress,
-            sourceFlag: SWFT_SOURCE_FLAG,
-            developerId: '',
+            sourceFlag: getSWFTConfig('source_flag'),
+            developerId: getSWFTConfig('developer_id'),
         });
     const result = JSON.parse(rawResponse.text)
     evaluateSWFTResponse(result.resCode)
@@ -140,3 +141,4 @@ export function evaluateSWFTResponse (code: string|number, throwOnError=true) {
     if(swftCode!==800 && throwOnError) throw Error(codes[swftCode])
     return codes[swftCode]
 }
+

@@ -1,4 +1,4 @@
-import { SWFT_DEFAULT_FEE_RATE } from '../config/swft.config';
+import { getSWFTConfig } from '../config/swft.config';
 import { SWFTRate, SWFTResponse } from '../interfaces/swft.interfaces';
 import { Rate } from '../interfaces/output.interfaces';
 
@@ -46,7 +46,7 @@ rateApp.get('*/:deposit/:receive', async (request: any, response: any) => {
             depositMin: parseFloat(rawRateResponse.data.depositMin),
             instantRate: parseFloat(rawRateResponse.data.instantRate),
             receiveCoinFee: parseFloat(rawRateResponse.data.receiveCoinFee),
-            depositCoinFeeRate: SWFT_DEFAULT_FEE_RATE,
+            depositCoinFeeRate: getSWFTConfig('fee_rate'),
         }
 
         response.json(res)
